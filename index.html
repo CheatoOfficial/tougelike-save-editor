@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tougelike+ Save Editor</title>
+<meta name="description" content="Edit and re-sign Tougelike+ save files in your browser. Nothing is uploaded.">
+<style>
+:root{--bg:#0d0e13;--panel:#171a23;--panel2:#1f2330;--line:#2c3142;--text:#e9ebf3;--muted:#8d93a8;--accent:#ffb000;--cyan:#38e1ff;--ok:#46d17b;--bad:#ff5c6c;--warn:#ffd25c;--r:10px}
+@media (prefers-color-scheme:light){:root:not([data-theme=dark]){--bg:#f3f4f8;--panel:#fff;--panel2:#eef0f6;--line:#d5d9e6;--text:#161824;--muted:#5d647a;--accent:#b36b00;--cyan:#006f8a;--ok:#12803f;--bad:#c4263a;--warn:#8a6500}}
+*{box-sizing:border-box}
+html{color-scheme:light dark}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 90px}
+h1{font-size:1.6rem;margin:0}h1 small{color:var(--accent);font-weight:600;font-size:.6em;letter-spacing:.08em;margin-left:.5em}
+h2{font-size:1.05rem;margin:0 0 10px}h3{font-size:.95rem;margin:16px 0 6px}
+p{margin:.5em 0}.muted{color:var(--muted)}.sub{color:var(--muted);margin:4px 0 16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin:14px 0}
+.drop{border:2px dashed var(--line);border-radius:var(--r);padding:26px;text-align:center;background:var(--panel);transition:.15s}
+.drop.over{border-color:var(--accent);background:var(--panel2)}
+.btn{font:inherit;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 13px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.tab:focus-visible{outline:2px solid var(--cyan);outline-offset:1px}
+.btn.primary{background:var(--accent);color:#1a1200;border-color:var(--accent);font-weight:650}
+.btn.small{padding:4px 9px;font-size:.85em}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.8rem;font-weight:650;border:1px solid}
+.chip.valid{color:var(--ok);border-color:var(--ok)}.chip.invalid{color:var(--bad);border-color:var(--bad)}.chip.unsigned{color:var(--warn);border-color:var(--warn)}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-top:18px}
+.tab{font:inherit;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:9px 13px;cursor:pointer}
+.tab[aria-selected=true]{color:var(--text);border-color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:3px;font-size:.85rem;color:var(--muted)}
+input[type=number],input[type=text],select,textarea{font:inherit;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:6px 8px;width:100%}
+input[type=number]{font-variant-numeric:tabular-nums}
+textarea{font:12.5px/1.45 ui-monospace,Consolas,monospace;min-height:380px;resize:vertical;white-space:pre}
+table{width:100%;border-collapse:collapse;font-size:.88rem}th,td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel)}
+td input[type=number]{width:96px}td select{width:auto;padding:4px}
+.scroll{overflow-x:auto}
+.ach{display:flex;gap:10px;align-items:flex-start;padding:7px 4px;border-bottom:1px solid var(--line)}
+.ach b{display:block}.ach span{color:var(--muted);font-size:.88rem}
+.ach.hidden-ach{background:color-mix(in srgb,var(--accent) 10%,transparent);border-radius:8px}
+kbd{background:var(--panel2);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 7px;font:.85em ui-monospace,Consolas,monospace}
+code{background:var(--panel2);padding:1px 5px;border-radius:4px;font-size:.88em;word-break:break-all}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:10px 16px;z-index:5}
+.bar .in{max-width:1040px;margin:0 auto;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.bar select{width:auto}.spacer{flex:1}
+.toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--accent);padding:8px 16px;border-radius:99px;opacity:0;pointer-events:none;transition:.2s;z-index:9}
+.toast.show{opacity:1}
+.note{border-left:3px solid var(--accent);background:var(--panel2);padding:8px 12px;border-radius:0 8px 8px 0;margin:10px 0}
+.err{color:var(--bad)}
+[hidden]{display:none!important}
+@media (max-width:600px){.wrap{padding-bottom:130px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Tougelike+ Save Editor <small>EDIT · SIGN · VERIFY</small></h1>
+  <p class="sub">Load a Tougelike+ save, change what you like, and download it with a fresh valid signature. Everything runs in your browser; nothing is uploaded.</p>
+
+  <div id="drop" class="drop">
+    <p><b>Drop your save here</b> or choose a file</p>
+    <p class="muted">Game export <code>tougelikeplus-save-….json</code> (Options &gt; SAVE) or a raw browser-storage <code>.sav</code></p>
+    <div class="row" style="justify-content:center">
+      <input id="file" type="file" accept=".json,.sav,application/json,text/plain" hidden>
+      <button class="btn primary" id="pick">Choose file…</button>
+      <button class="btn" id="paste">Paste JSON…</button>
+    </div>
+    <p id="loadErr" class="err" role="alert"></p>
+  </div>
+
+  <div id="editor" hidden>
+    <div class="card" id="status"></div>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div id="panel" class="card" role="tabpanel"></div>
+  </div>
+
+  <div class="card" id="about">
+    <h2>Good to know</h2>
+    <p>The game signs saves with an HMAC-SHA-256 whose key ships inside the public game bundle, so the check only catches accidental edits. Any signature this page makes is exactly what the game would accept. Use it for your own single-player save; there is no server to trick here.</p>
+    <p class="muted">Unofficial fan tool, not affiliated with the game's author. Keep a backup of your original save. Built for game version 00.22.41.</p>
+  </div>
+</div>
+
+<div class="bar" id="bar" hidden><div class="in">
+  <label class="row muted">Integrity flag
+    <select id="status-sel" aria-label="Integrity flag"><option value="genuine">GENUINE (signed)</option><option value="altered">ALTERED (honest)</option></select></label>
+  <label class="row muted">Format
+    <select id="fmt-sel" aria-label="Output format"><option value="file">Game export (.json)</option><option value="sav">Browser storage (.sav)</option></select></label>
+  <span class="spacer"></span>
+  <button class="btn" id="copy">Copy</button>
+  <button class="btn primary" id="download">Sign &amp; download</button>
+</div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="core.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
